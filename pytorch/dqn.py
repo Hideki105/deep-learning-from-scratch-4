@@ -63,11 +63,11 @@ class QNet(nn.Module):
 
 class DQNAgent:
     def __init__(self):
-        self.gamma = 0.90
-        self.lr = 0.0005
-        self.epsilon = 0.2
-        self.buffer_size = 10000
-        self.batch_size = 32
+        self.gamma = 0.99
+        self.lr = 1e-2
+        self.epsilon = 0.01
+        self.buffer_size = 1000
+        self.batch_size = 500
         self.action_size = 2
 
         self.replay_buffer = ReplayBuffer(self.buffer_size, self.batch_size)
@@ -109,7 +109,7 @@ class DQNAgent:
         self.qnet_target.load_state_dict(self.qnet.state_dict())
 
 
-episodes = 300
+episodes = 1000
 sync_interval = 20
 env = gym.make('CartPole-v1')
 agent = DQNAgent()
@@ -127,23 +127,24 @@ for episode in range(episodes):
         agent.update(state, action, reward, next_state, done)
         state = next_state
         total_reward += reward
-
+    
     if episode % sync_interval == 0:
         agent.sync_qnet()
 
     reward_history.append(total_reward)
     if episode % 10 == 0:
         print("episode :{}, total reward : {}".format(episode, total_reward))
+    
+    if total_reward > 400:
+        break
 
 from gym.wrappers import RecordVideo
 
-env = RecordVideo(gym.make("CartPole-v1"), ".\\")
+env = RecordVideo(gym.make("CartPole-v1", render_mode="rgb_array"), ".\\")
 state = env.reset()
-done = False
 total_reward = 0
 
-while not done:
-    env.render()
+for i in range(1000):
     action = agent.get_action(state)
     next_state, reward, terminated, truncated, info = env.step(action)
     if terminated or truncated:
