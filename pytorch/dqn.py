@@ -98,7 +98,7 @@ class DQNAgent:
         next_q.detach()
         target = reward + (1 - done) * self.gamma * next_q
 
-        loss_fn = nn.MSELoss()
+        loss_fn = nn.HuberLoss()
         loss = loss_fn(q, target)
 
         self.optimizer.zero_grad()
@@ -134,9 +134,10 @@ for episode in range(episodes):
     reward_history.append(total_reward)
     if episode % 10 == 0:
         print("episode :{}, total reward : {}".format(episode, total_reward))
-    
-    if total_reward > 400:
+
+    if total_reward > 600:
         break
+    
 
 from gym.wrappers import RecordVideo
 
